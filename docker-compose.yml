@@ -1,0 +1,63 @@
+services:
+  master:
+    build: .
+    container_name: master
+    hostname: master
+    ports:
+      - "9870:9870"   # NameNode UI
+      - "8089:8088"   # YARN UI
+    networks:
+      hadoopnet:
+        ipv4_address: 172.25.0.4
+    volumes:
+      - ./config:/home/hadoop/hadoop/etc/hadoop
+      - ./data/master:/home/hadoop/hadoop_data
+    extra_hosts:
+      - "master:172.25.0.4"
+      - "slave1:172.25.0.3"
+      - "slave2:172.25.0.2"
+    entrypoint: ["/home/hadoop/scripts/entrypoint-master.sh"]
+
+  slave1:
+    build: .
+    container_name: slave1
+    hostname: slave1
+    networks:
+      hadoopnet:
+        ipv4_address: 172.25.0.3
+    volumes:
+      - ./config:/home/hadoop/hadoop/etc/hadoop
+      - ./data/slave1:/home/hadoop/hadoop_data
+    depends_on:
+      - master
+    extra_hosts:
+      - "master:172.25.0.4"
+      - "slave1:172.25.0.3"
+      - "slave2:172.25.0.2"
+    entrypoint: ["/home/hadoop/scripts/entrypoint-slave.sh"]
+
+  slave2:
+    build: .
+    container_name: slave2
+    hostname: slave2
+    networks:
+      hadoopnet:
+        ipv4_address: 172.25.0.2
+    volumes:
+      - ./config:/home/hadoop/hadoop/etc/hadoop
+      - ./data/slave2:/home/hadoop/hadoop_data
+    depends_on:
+      - master
+    extra_hosts:
+      - "master:172.25.0.4"
+      - "slave1:172.25.0.3"
+      - "slave2:172.25.0.2"
+    entrypoint: ["/home/hadoop/scripts/entrypoint-slave.sh"]
+
+
+networks:
+  hadoopnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
