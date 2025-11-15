@@ -1,3 +1,5 @@
+link do repositorio: https://github.com/luanatorress/trabalho2PSPD
+
 # Como subir o ambiente:
 
 hadoop-cluster$ 
